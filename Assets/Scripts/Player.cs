@@ -6,7 +6,7 @@ public class Player : MonoBehaviour
 {
 
     public float baseMoveSpeed = 1f;
-    public float acc = 0.2f;
+    public float acc = 0.4f;
     public float maxMoveSpeed = 2f;
     public float currMoveSpeed;
     public bool isInAir;
@@ -46,22 +46,20 @@ public class Player : MonoBehaviour
 
         if (Input.GetKey(KeyCode.Space) && !isInAir)
         {
-            vertVeloc = 5f + 0.75f*currMoveSpeed;
+            vertVeloc = 20f + 3f*currMoveSpeed;
+            gameObject.GetComponent<Rigidbody>().AddForce(Vector3.up * vertVeloc);
         }
-        transform.Translate(Vector3.up * vertVeloc * Time.deltaTime);
-        if (isInAir){
-            vertVeloc -= 5f*Time.deltaTime;
-        }
+        //transform.Translate(Vector3.up * vertVeloc * Time.deltaTime);
 
         currMoveSpeed = Mathf.Max(baseMoveSpeed, Mathf.Min(maxMoveSpeed, currMoveSpeed + acc*accMult*Time.deltaTime));
 
     }
 
 
-    void OnTriggerEnter(Collider collisionInfo)
+    void OnCollisionEnter(Collision collisionInfo)
     {
-        Debug.Log(collisionInfo.name);
-        if (collisionInfo.name == "Ground")
+        Debug.Log(collisionInfo.collider.name);
+        if (collisionInfo.collider.name == "Platform Part A")
         {
             Debug.Log("Success!");
             isInAir = false;
@@ -69,9 +67,9 @@ public class Player : MonoBehaviour
         }
     }
 
-    void OnTriggerExit(Collider collisionInfo)
+    void OnCollisionExit(Collision collisionInfo)
     {
-        if (collisionInfo.name == "Ground")
+        if (collisionInfo.collider.name == "Platform Part A")
         {
             isInAir = true;
         }
