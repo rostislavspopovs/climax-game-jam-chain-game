@@ -26,6 +26,12 @@ public class Player : MonoBehaviour
     {
         
         transform.Translate(Vector3.forward * currMoveSpeed * Time.deltaTime);
+        int layerMask = 1 << 2;
+        layerMask = ~layerMask;
+        RaycastHit hit;
+        isInAir = !(Physics.Raycast(transform.position, transform.TransformDirection(Vector3.down), out hit, 3, layerMask));
+        //Debug.DrawRay(transform.position, transform.TransformDirection(Vector3.down) * (10f), Color.red);
+        //Debug.Log(transform.position);
         float accMult = -1f;
         if (Input.GetKey(KeyCode.W))
         {
@@ -47,7 +53,7 @@ public class Player : MonoBehaviour
         if (Input.GetKey(KeyCode.Space) && !isInAir)
         {
             vertVeloc = 20f + 3f*currMoveSpeed;
-            gameObject.GetComponent<Rigidbody>().AddForce(Vector3.up * vertVeloc);
+            RecursiveJump(transform, countJumping(transform));
         }
         //transform.Translate(Vector3.up * vertVeloc * Time.deltaTime);
 
@@ -73,5 +79,36 @@ public class Player : MonoBehaviour
         {
             isInAir = true;
         }
+    }
+
+    void RecursiveJump(Transform parent, int numJumpers)
+    {
+        if (parent.GetComponent<Rigidbody>() != null)
+            {
+                parent.GetComponent<Rigidbody>().AddForce(Vector3.up * vertVeloc/numJumpers);
+            }
+        foreach (Transform child in parent)
+        {
+            
+            RecursiveJump(child, numJumpers);
+        }
+    }
+
+    int countJumping(Transform parent)
+    {
+        int count;
+        if (parent.GetComponent<Rigidbody>() != null)
+        {
+            count = 1;
+        }
+        else
+        {
+            count = 0;
+        }
+        foreach (Transform child in parent)
+        {
+            count += countJumping(child);
+        }
+        return count;
     }
 }
