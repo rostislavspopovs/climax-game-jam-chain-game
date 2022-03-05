@@ -29,7 +29,7 @@ public class Player : MonoBehaviour
         int layerMask = 1 << 2;
         layerMask = ~layerMask;
         RaycastHit hit;
-        isInAir = !(Physics.Raycast(transform.position, transform.TransformDirection(Vector3.down), out hit, 3, layerMask));
+        isInAir = !(Physics.Raycast(transform.position, transform.TransformDirection(Vector3.down), out hit, 2.5f, layerMask));
         //Debug.DrawRay(transform.position, transform.TransformDirection(Vector3.down) * (10f), Color.red);
         //Debug.Log(transform.position);
         float accMult = -1f;
@@ -52,7 +52,7 @@ public class Player : MonoBehaviour
 
         if (Input.GetKey(KeyCode.Space) && !isInAir)
         {
-            vertVeloc = 20f + 3f*currMoveSpeed;
+            vertVeloc = 50f + 5f*currMoveSpeed;
             RecursiveJump(transform, countJumping(transform));
         }
         //transform.Translate(Vector3.up * vertVeloc * Time.deltaTime);
