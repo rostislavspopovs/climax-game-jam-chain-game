@@ -14,13 +14,18 @@ public class Player : MonoBehaviour
     public float startJumpHeight;
     private Rigidbody rb;
 
+    public bool artificalRotation;
     public float ROTATION_CONST = 100f;
 
     public GameObject armature;
 
+    public float jumpPower;
+    public float movePower;
+
     // Start is called before the first frame update
     void Start()
     {
+        Application.targetFrameRate = 60;
         currMoveSpeed = baseMoveSpeed;
         isInAir = true;
         rb = GetComponent<Rigidbody>();
@@ -34,7 +39,7 @@ public class Player : MonoBehaviour
         int layerMask = 1 << 2;
         layerMask = ~layerMask;
         RaycastHit hit;
-        isInAir = !(Physics.Raycast(transform.position, transform.TransformDirection(Vector3.down), out hit, 2.5f, layerMask));
+        isInAir = !(Physics.Raycast(transform.position, Vector3.down, out hit, 2.8f, layerMask));
         //Debug.DrawRay(transform.position, transform.TransformDirection(Vector3.down) * (10f), Color.red);
         //Debug.Log(transform.position);
         float accMult = -1f;
@@ -48,24 +53,27 @@ public class Player : MonoBehaviour
         }
         if (Input.GetKey(KeyCode.A))
         {
-            transform.Translate(Vector3.left * 5 * Time.deltaTime);
+            transform.position += ((Vector3.left * movePower * Time.deltaTime));
         }
         else if (Input.GetKey(KeyCode.D))
         {
-            transform.Translate(Vector3.right * 5 * Time.deltaTime);
+            transform.position += ((Vector3.left * movePower * Time.deltaTime));
         }
 
         if (Input.GetKey(KeyCode.Space) && !isInAir)
         {
-            vertVeloc = 50f + 5f*currMoveSpeed;
-            RecursiveJump(transform, countJumping(transform));
+            vertVeloc = jumpPower + (jumpPower/3)*currMoveSpeed;
+            rb.AddForce((vertVeloc*Vector3.up+rb.velocity.normalized*1)*Time.deltaTime, ForceMode.VelocityChange);
+            //RecursiveJump(transform, countJumping(transform));
         }
         //transform.Translate(Vector3.up * vertVeloc * Time.deltaTime);
 
-        Vector3 rotVector = rb.velocity.normalized;
-        Debug.DrawLine(armature.transform.position, rotVector*50, Color.red);
-        armature.transform.rotation = Quaternion.Slerp(armature.transform.rotation, Quaternion.LookRotation(rotVector), ROTATION_CONST * Time.deltaTime);
-
+        if (artificalRotation)
+        {
+            Vector3 rotVector = rb.velocity.normalized;
+            Debug.DrawLine(armature.transform.position, rotVector * 50, Color.red);
+            armature.transform.rotation = Quaternion.Slerp(armature.transform.rotation, Quaternion.LookRotation(rotVector), ROTATION_CONST * Time.deltaTime);
+        }
         currMoveSpeed = Mathf.Max(baseMoveSpeed, Mathf.Min(maxMoveSpeed, currMoveSpeed + acc*accMult*Time.deltaTime));
 
     }
