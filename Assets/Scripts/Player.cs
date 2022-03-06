@@ -12,20 +12,25 @@ public class Player : MonoBehaviour
     public bool isInAir;
     public float vertVeloc = 0f;
     public float startJumpHeight;
+    private Rigidbody rb;
+
+    public float ROTATION_CONST = 100f;
+
+    public GameObject armature;
 
     // Start is called before the first frame update
     void Start()
     {
         currMoveSpeed = baseMoveSpeed;
         isInAir = true;
+        rb = GetComponent<Rigidbody>();
 
     }
 
     // Update is called once per frame
     void Update()
     {
-        
-        transform.Translate(Vector3.forward * currMoveSpeed * Time.deltaTime);
+        transform.Translate(-Vector3.forward * currMoveSpeed * Time.deltaTime);
         int layerMask = 1 << 2;
         layerMask = ~layerMask;
         RaycastHit hit;
@@ -57,6 +62,10 @@ public class Player : MonoBehaviour
         }
         //transform.Translate(Vector3.up * vertVeloc * Time.deltaTime);
 
+        Vector3 rotVector = rb.velocity.normalized;
+        Debug.DrawLine(armature.transform.position, rotVector*50, Color.red);
+        armature.transform.rotation = Quaternion.Slerp(armature.transform.rotation, Quaternion.LookRotation(rotVector), ROTATION_CONST * Time.deltaTime);
+
         currMoveSpeed = Mathf.Max(baseMoveSpeed, Mathf.Min(maxMoveSpeed, currMoveSpeed + acc*accMult*Time.deltaTime));
 
     }
@@ -83,9 +92,10 @@ public class Player : MonoBehaviour
 
     void RecursiveJump(Transform parent, int numJumpers)
     {
-        if (parent.GetComponent<Rigidbody>() != null)
+        rb = parent.GetComponent<Rigidbody>();
+        if (rb != null)
             {
-                parent.GetComponent<Rigidbody>().AddForce(Vector3.up * vertVeloc/numJumpers);
+                rb.AddForce(Vector3.up * vertVeloc/numJumpers);
             }
         foreach (Transform child in parent)
         {
